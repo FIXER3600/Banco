@@ -1,76 +1,65 @@
 package controller;
-
-import java.text.DecimalFormat;
 import java.util.concurrent.Semaphore;
 
-public class Transferencias extends Thread{
-    private int cod;
-    private double  saldo;
-    private double valor;
-    private double novoSaldo;
-    private Semaphore semaforo;
-    DecimalFormat df = new DecimalFormat("#.##");
-
-    public Transferencias(int cod,Semaphore semaforo) {
-        this.cod = cod;
-        this.semaforo=semaforo;
+public class Transferencias extends Thread {
+    private int operacao, conta;
+    private Semaphore semaforoSaque, semaforoDeposito;
+    private float saldo, valor;
+    int wait = (int)((Math.random() * 1000) + 1);
+    public Transferencias(int conta, int operacao, float saldo, float valor, Semaphore semaforoSaque,Semaphore semaforoDeposito){
+        this.conta = conta;
+        this.operacao = operacao;
+        this.semaforoSaque = semaforoSaque;
+        this.semaforoDeposito = semaforoDeposito;
+        this.saldo = saldo;
+        this.valor = valor;
     }
 
-    private void saldo() {
-        this.saldo =  ((Math.random()  * 901) + 99);
-        this.valor =  ((Math.random()  * 801) + 99);
-
-    }
-
-    @Override
-    public void run() {
-       saldo();
-        saque();
-        deposito();
-
-
-    }
-    private void saque() {
-        try {
-            semaforo.acquire();
-            if(valor>saldo){
-                System.out.println("O valor R$"+df.format(this.valor)+" a ser sacado na conta "+this.cod+" é maior que o saldo R$" +df.format(this.saldo));
-            }
-            else {
-                System.out.println("Saque de R$ " + df.format(this.valor) + " na conta " + this.cod + " de R$ " + df.format(this.saldo));
-                //novoSaldo=this.saldo - this.valor;
-                if (this.saldo == novoSaldo) {
-                    novoSaldo = this.saldo - this.valor;
-                    System.out.println("Saldo restante da conta " + this.cod + " é de R$ " + df.format(novoSaldo));
-
+    public void run(){
+        int op = operacao % 2;
+        switch(op){
+            case 0:
+                try {
+                    semaforoDeposito.acquire();
+                    System.out.println("Iniciando depósito na conta "+this.conta);
+                    deposito();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    semaforoDeposito.release();
                 }
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }finally {
-            semaforo.release();
+                break;
+            case 1:
+                try {
+                    semaforoSaque.acquire();
+                    System.out.println("Iniciando saque da conta "+this.conta);
+                    saque();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    semaforoSaque.release();
+                }
+                break;
         }
-
     }
 
-    private void deposito() {
+    public void saque(){
         try {
-            semaforo.acquire();
-            System.out.println("Depósito de R$ "+df.format(this.valor)+" na conta "+this.cod);
-            novoSaldo=this.saldo+this.valor;
-            if(novoSaldo==this.valor){
-
-                novoSaldo=this.saldo+this.valor;
-                System.out.println("Saldo atual R$ "+df.format(novoSaldo)+" da conta "+this.cod);
-            }else{
-                System.out.println("Saldo atual R$ "+df.format(novoSaldo)+" da conta "+this.cod);
-            }
+            Thread.sleep(this.wait);
+            this.saldo += this.valor;
+            System.out.println("Novo saldo da conta "+this.conta+" ,após saque "+this.saldo);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }finally {
-            semaforo.release();
         }
     }
+    public void deposito(){
+        try {
+            Thread.sleep(this.wait);
+            this.saldo += this.valor;
+            System.out.println("Novo saldo da conta "+this.conta+" ,após depósito "+this.saldo);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-
+    }
 }
