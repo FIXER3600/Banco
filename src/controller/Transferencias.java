@@ -16,12 +16,12 @@ public class Transferencias extends Thread {
     }
 
     public void run(){
-        int op = operacao % 2;
-        switch(op){
+        int opcao = operacao % 2;
+        switch(opcao){
             case 0:
                 try {
                     semaforoDeposito.acquire();
-                    System.out.println("Iniciando depósito na conta "+this.conta);
+                    System.out.println("Depósitando na conta "+this.conta);
                     deposito();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -32,7 +32,7 @@ public class Transferencias extends Thread {
             case 1:
                 try {
                     semaforoSaque.acquire();
-                    System.out.println("Iniciando saque da conta "+this.conta);
+                    System.out.println("Sacando da conta "+this.conta);
                     saque();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -47,7 +47,7 @@ public class Transferencias extends Thread {
         try {
             Thread.sleep(this.wait);
             this.saldo += this.valor;
-            System.out.println("Novo saldo da conta "+this.conta+" ,após saque "+this.saldo);
+            System.out.println("Saldo da conta "+this.conta+", após saque "+this.saldo);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -56,7 +56,7 @@ public class Transferencias extends Thread {
         try {
             Thread.sleep(this.wait);
             this.saldo += this.valor;
-            System.out.println("Novo saldo da conta "+this.conta+" ,após depósito "+this.saldo);
+            System.out.println("Saldo da conta "+this.conta+", após depósito "+this.saldo);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
